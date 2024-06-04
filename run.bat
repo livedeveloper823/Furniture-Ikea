@@ -1,0 +1,3 @@
+python Ikea.py
+
+pause
