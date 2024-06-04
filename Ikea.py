@@ -3,35 +3,8 @@ import openpyxl.workbook
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-import openpyxl, json, re
+import openpyxl, json, re, func
 
-
-def wait_url(driver: webdriver.Chrome, url: str):
-    while True:
-        cur_url = driver.current_url
-        if cur_url == url:
-            break
-        sleep(0.1)
-
-def find_element(driver: webdriver.Chrome, whichBy, unique: str) -> WebElement:
-    while True:
-        try:
-            element = driver.find_element(whichBy, unique)
-            break
-        except:
-            pass
-        sleep(1)
-    return element
-
-def find_elements(driver : webdriver.Chrome, whichBy, unique: str) -> list[WebElement]:
-    while True:
-        try:
-            elements = driver.find_elements(whichBy, unique)
-            break
-        except:
-            pass
-        sleep(1)
-    return elements
 
 wb = openpyxl.Workbook()
 
@@ -131,7 +104,7 @@ driver.maximize_window()
 
 for url in urls:
     driver.get(url)
-    wait_url(driver, url)
+    func.wait_url(driver, url)
 
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2)")
     sleep(0.3)
@@ -146,7 +119,7 @@ for url in urls:
             break
         sleep(0.1)
 
-    products = find_elements(driver, By.CLASS_NAME, "plp-fragment-wrapper")
+    products = func.find_elements(driver, By.CLASS_NAME, "plp-fragment-wrapper")
     product_urls = []
     
     for product in products:
@@ -160,18 +133,18 @@ for url in urls:
         sheet = workbook['Sheet']
         driver.get(product_url)
         sleep(0.5)
-        product_name = find_element(driver, By.CLASS_NAME, "js-price-package").find_element(By.CLASS_NAME, "pip-header-section__title--big").text
+        product_name = func.find_element(driver, By.CLASS_NAME, "js-price-package").find_element(By.CLASS_NAME, "pip-header-section__title--big").text
         print(product_name)
         sheet[f'E{match_num+1}'] = product_name
-        product_subncription = find_element(driver, By.CLASS_NAME, "js-price-package").find_element(By.CLASS_NAME, "pip-header-section__description").text
-        product_price = find_element(driver, By.CLASS_NAME, "js-price-package").find_element(By.CLASS_NAME, "pip-temp-price--currency-super-aligned").find_element(By.CLASS_NAME, "pip-temp-price__integer").text.replace(".", "")
+        product_subncription = func.find_element(driver, By.CLASS_NAME, "js-price-package").find_element(By.CLASS_NAME, "pip-header-section__description").text
+        product_price = func.find_element(driver, By.CLASS_NAME, "js-price-package").find_element(By.CLASS_NAME, "pip-temp-price--currency-super-aligned").find_element(By.CLASS_NAME, "pip-temp-price__integer").text.replace(".", "")
         print(product_price)
         sheet[f'D{match_num+1}'] = product_price
-        find_element(driver, By.CLASS_NAME, "pip-product__left-bottom").find_element(By.CLASS_NAME, "js-product-information-section").find_element(By.ID, "pip-product-information-section-list-0").click()
+        func.find_element(driver, By.CLASS_NAME, "pip-product__left-bottom").find_element(By.CLASS_NAME, "js-product-information-section").find_element(By.ID, "pip-product-information-section-list-0").click()
         sleep(2)
-        find_element(driver, By.ID, "product-details-material-and-care").click()
+        func.find_element(driver, By.ID, "product-details-material-and-care").click()
         sleep(0.5)
-        material_data_box = find_element(driver, By.ID, "SEC_product-details-material-and-care")
+        material_data_box = func.find_element(driver, By.ID, "SEC_product-details-material-and-care")
         material_data = material_data_box.find_elements(By.TAG_NAME, "dl")
 
         # Structure
@@ -303,14 +276,14 @@ for url in urls:
                 pass
         
         # Close the material modal
-        find_element(driver, By.CLASS_NAME, "pip-modal-header__close").click()
+        func.find_element(driver, By.CLASS_NAME, "pip-modal-header__close").click()
         sleep(1)
 
         # Measurement
         try:
-            find_element(driver, By.CLASS_NAME, "pip-product__left-bottom").find_element(By.CLASS_NAME, "js-product-information-section").find_element(By.ID, "pip-product-information-section-list-2").click()
+            func.find_element(driver, By.CLASS_NAME, "pip-product__left-bottom").find_element(By.CLASS_NAME, "js-product-information-section").find_element(By.ID, "pip-product-information-section-list-2").click()
             sleep(1)
-            dimentions = find_element(driver, By.CLASS_NAME, "pip-modal-body").find_element(By.CLASS_NAME, "pip-product-dimensions").find_element(By.CLASS_NAME, "pip-product-dimensions__dimensions-container").find_elements(By.TAG_NAME, "p")
+            dimentions = func.find_element(driver, By.CLASS_NAME, "pip-modal-body").find_element(By.CLASS_NAME, "pip-product-dimensions").find_element(By.CLASS_NAME, "pip-product-dimensions__dimensions-container").find_elements(By.TAG_NAME, "p")
             for dimention in dimentions:
                 if "Longitud" in dimention.text.split(":")[0].strip():
                     length = dimention.text.split(":")[1].strip()
@@ -389,11 +362,11 @@ for url in urls:
                     print(thickness)
                     sheet[f'BI{match_num+1}'] = thickness
 
-            find_element(driver, By.CLASS_NAME, "pip-modal-header__close").click()
+            func.find_element(driver, By.CLASS_NAME, "pip-modal-header__close").click()
         except:
-            find_element(driver, By.CLASS_NAME, "pip-product__left-bottom").find_element(By.CLASS_NAME, "js-product-information-section").find_element(By.ID, "pip-product-information-section-list-1").click()
+            func.find_element(driver, By.CLASS_NAME, "pip-product__left-bottom").find_element(By.CLASS_NAME, "js-product-information-section").find_element(By.ID, "pip-product-information-section-list-1").click()
             sleep(1)
-            dimentions = find_element(driver, By.CLASS_NAME, "pip-modal-body").find_element(By.CLASS_NAME, "pip-product-dimensions").find_element(By.CLASS_NAME, "pip-product-dimensions__dimensions-container").find_elements(By.TAG_NAME, "p")
+            dimentions = func.find_element(driver, By.CLASS_NAME, "pip-modal-body").find_element(By.CLASS_NAME, "pip-product-dimensions").find_element(By.CLASS_NAME, "pip-product-dimensions__dimensions-container").find_elements(By.TAG_NAME, "p")
             for dimention in dimentions:
                 if "Longitud" in dimention.text.split(":")[0].strip():
                     length = dimention.text.split(":")[1].strip()
@@ -472,6 +445,6 @@ for url in urls:
                     print(thickness)
                     sheet[f'BI{match_num+1}'] = thickness
             
-            find_element(driver, By.CLASS_NAME, "pip-modal-header__close").click()
+            func.find_element(driver, By.CLASS_NAME, "pip-modal-header__close").click()
         workbook.save('ikea.xlsx')
     match_num += 2
